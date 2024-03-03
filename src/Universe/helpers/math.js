@@ -1,8 +1,22 @@
 // The random number can be equal to min or to max if and only if epsilon = 0.
-function getRandomNumber (min, max, epsilon = 0) 
+/*function getRandomNumber (min, max, epsilon = 0) 
 {
     return Math.random() * ((max - epsilon) - (min + epsilon)) + (min + epsilon);
+}*/
+
+function getRandomNumber (min, max, epsilon = 0) {
+    // Generate a random 32-bit integer using crypto.getRandomValues
+    const array = new Uint32Array(1);
+    window.crypto.getRandomValues(array);
+
+    // Convert the random integer to a float in [0, 1)
+    const maxUint32 = 2 ** 32;
+    const randomFloat = array[0] / maxUint32;
+
+    // Adjust the range of the random number according to min, max, and epsilon
+    return (randomFloat * ((max - epsilon) - (min + epsilon))) + (min + epsilon);
 }
+
 
 
 function getXYZFromSphericalCoords (r, theta, phi)

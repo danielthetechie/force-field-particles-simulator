@@ -19,11 +19,11 @@ class Universe
 
     constructor (container)
     {
-        this.global_radius = 1000;
+        this.global_radius = 800;
         this.gravitational_constant = -1;
 
-        this.max_mass_particles = 500;
-        this.min_mass_particles = 10;
+        this.max_mass_particles = 1000;
+        this.min_mass_particles = 100;
 
         this.max_particle_density = 22.5; // Osmium density
         this.min_particle_density = 1; // Water density
@@ -99,19 +99,18 @@ class Universe
 
             let particle_radius = Math.cbrt (particle_mass / (4/3 * particle_density * Math.PI));
 
-            let r = getRandomNumber (100, this.global_radius, 0.001);
+            let r = getRandomNumber (this.global_radius * 0.3, this.global_radius, 0.001);
             let theta = getRandomNumber (0, 2 * Math.PI, 0.001);
             let phi = getRandomNumber (0, Math.PI, 0.001);
 
             let particle_position = getXYZFromSphericalCoords (r, theta, phi);
-            let particle_velocity = 
-            {
-                x: 0.25 * getRandomNumber (-20, 20), 
-                y: 0.25 * getRandomNumber (-20, 20), 
-                z: 0.25 * getRandomNumber (-20, 20)
+            let particle_velocity = {
+                x: getRandomNumber (-10, 10), 
+                y: getRandomNumber (-10, 10), 
+                z: getRandomNumber (-10, 10)
             };
 
-            particle_velocity = null;
+            particle_velocity = {x: 0, y: 0, z: 0};
 
             this.addParticle (particle_position, particle_velocity, particle_radius, particle_mass);
         }
