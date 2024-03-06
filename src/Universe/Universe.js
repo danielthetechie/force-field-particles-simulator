@@ -5,7 +5,7 @@ import { Resizer } from './systems/Resizer.js';
 import { Particle } from './components/Particle.js';
 
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { getRandomNumber, getXYZFromSphericalCoords } from './helpers/math.js';
+import { getRandomNumber, getXYZFromSphericalCoords, getLengthOfN3DVectorsSum } from './helpers/math.js';
 
 class Universe 
 {
@@ -17,13 +17,21 @@ class Universe
     #particles;
     #controls;
 
-    constructor (container)
+    constructor ({container, renderer = null, gravitational_constant = -1, global_radius = 200, particles_initial_distance_from_origin = 0, particles_initial_max_speed_per_axis = 0, number_of_particles = 100, max_mass_particles = 10, min_mass_particles = 3 })
     {
-        this.global_radius = 800;
-        this.gravitational_constant = -1;
+        this.gravitational_constant = gravitational_constant;
+        console.log (this.gravitational_constant)
+        this.global_radius = global_radius;
+        this.particles_initial_distance_from_origin = particles_initial_distance_from_origin;
+        this.particles_initial_max_velocity_per_axis = particles_initial_max_speed_per_axis;
 
-        this.max_mass_particles = 1000;
-        this.min_mass_particles = 100;
+        if (this.particles_initial_distance_from_origin >= this.global_radius)
+        {
+            this.particles_initial_distance_from_origin = this.global_radius * 0.99;
+        }
+
+        this.max_mass_particles = max_mass_particles;
+        this.min_mass_particles = min_mass_particles;
 
         this.max_particle_density = 22.5; // Osmium density
         this.min_particle_density = 1; // Water density
@@ -31,7 +39,7 @@ class Universe
         this.#scene = new Scene ({ background:0x040404 });
         this.#light = new AmbientLight (0xeb9b34, 3);
 
-        this.#renderer = new Renderer ();
+        this.#renderer = renderer || new Renderer ();
         container.append (this.#renderer.domElement);
 
         this.#camera = new PerspectiveCamera (35, window.innerWidth / window.innerHeight, 0.1, 200000);
@@ -43,13 +51,18 @@ class Universe
 
         this.#scene.add (this.#light, this.#camera);
 
-        this.#particles = [];
-        //this.addParticle (null, null, 20, 500000, 0x456672);
-        this.addNParticles (1000);
+        this.variables_info = new Map ();
 
-        setInterval (()=> 
+        this.#particles = [];
+        //this.addParticle (null, null, 20, 50000, 0x456672);
+        this.addNParticles (number_of_particles);
+
+        this.variables_info.set ("remaining_particles", this.#particles.length);
+
+        this.events = setInterval (()=> 
         {
             let intersected_particle = null;
+            let system_total_speed = 0;
             for (let i = 0; i < this.#particles.length; i++)
             {
                 intersected_particle = this.#particles[i].getFirstIntersectingExternalParticle (this.#particles);
@@ -61,7 +74,7 @@ class Universe
                 } else {
                     // No collision, so there is a force between them.
                     let force_experienced = 0;
-                    force_experienced = this.#particles[i].getForceExperiencedFromExternalParticles (this.#particles);
+                    force_experienced = this.#particles[i].getForceExperiencedFromExternalParticles (this.#particles, this.gravitational_constant);
 
                     this.#particles[i].force_experienced.x = force_experienced.x;
                     this.#particles[i].force_experienced.y = force_experienced.y;
@@ -73,7 +86,12 @@ class Universe
                         z: this.#particles[i].force_experienced.z / this.#particles[i].mass 
                     };
                 }
+
+                system_total_speed += this.#particles[i].getInstantSpeed ();
             }
+
+            this.variables_info.set ("remaining_particles", this.#particles.length);
+            this.variables_info.set ("system_average_speed", (system_total_speed / this.#particles.length).toFixed (2));
         }, 100);
 
         new Resizer (container, this.#camera, this.#renderer).setSize ();
@@ -99,18 +117,26 @@ class Universe
 
             let particle_radius = Math.cbrt (particle_mass / (4/3 * particle_density * Math.PI));
 
-            let r = getRandomNumber (this.global_radius * 0.3, this.global_radius, 0.001);
+            let r = getRandomNumber (this.particles_initial_distance_from_origin, this.global_radius, 0.001);
             let theta = getRandomNumber (0, 2 * Math.PI, 0.001);
             let phi = getRandomNumber (0, Math.PI, 0.001);
 
             let particle_position = getXYZFromSphericalCoords (r, theta, phi);
+
             let particle_velocity = {
-                x: getRandomNumber (-10, 10), 
-                y: getRandomNumber (-10, 10), 
-                z: getRandomNumber (-10, 10)
+                x: 0,
+                y: 0, 
+                z: 0
             };
 
-            particle_velocity = {x: 0, y: 0, z: 0};
+            if (this.particles_initial_max_velocity_per_axis != 0)
+            {
+                particle_velocity = {
+                    x: getRandomNumber (-this.particles_initial_max_velocity_per_axis, this.particles_initial_max_velocity_per_axis),
+                    y: getRandomNumber (-this.particles_initial_max_velocity_per_axis, this.particles_initial_max_velocity_per_axis), 
+                    z: getRandomNumber (-this.particles_initial_max_velocity_per_axis, this.particles_initial_max_velocity_per_axis)
+                };
+            }
 
             this.addParticle (particle_position, particle_velocity, particle_radius, particle_mass);
         }
@@ -162,9 +188,56 @@ class Universe
         this.addParticle (paired_particle_position, paired_particle_velocity, paired_particle_radius, paired_particle_mass, color_after_collision);
     }
 
+    getRenderer () 
+    {
+        return this.#renderer;
+    }
+
     start ()
     {
         this.#loop.start ();
+    }
+
+    stop ()
+    {
+        this.#loop.stop ();
+    }
+
+    saveCurrentProperties ()
+    {
+
+
+    }
+
+    load (universe_properties)
+    {
+        console.log (universe_properties);
+    }
+
+    selfDestroy ()
+    {
+        this.stop ();
+        clearInterval (this.events);
+
+        this.#scene.traverse(object => {
+            if (object.isMesh) {
+                if (object.geometry) object.geometry.dispose();
+                if (object.material) {
+                    if (object.material.map) object.material.map.dispose();
+                    object.material.dispose();
+                }
+            }
+        });
+        this.#renderer.dispose();
+        
+        // Remove all the object properties
+        for (let prop in this) 
+        {
+            if (this.hasOwnProperty(prop)) 
+            {
+                delete this[prop];
+            }
+        }
     }
 
 }

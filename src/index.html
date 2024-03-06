@@ -5,25 +5,23 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Sistema de partículas</title>
 
-	<!--link rel="stylesheet" src="./styles.css"-->
-	<style>
-		body {
-			padding:0px;
-			margin:0px;
-			overflow:hidden;
-		}
-		
-		canvas {
-			width: 100vw !important;
-			height: 100vh !important;
-		}
-	</style>
+	<link rel="stylesheet" href="./styles.css">
 
     <script type="module" src="./main.js"></script>
 </head>
 <body>
-
 	<div id="scene-container"></div>
+	<div id="info">
+		<table>
+			<tr>
+				<td>Partículas restantes:</td><td id="remaining-particles-value"></td>
+			</tr>
+
+			<tr>
+				<td>Velocidad media del sistema:</td><td id="system-average-speed"></td>
+			</tr>
+		</table>
+	</div>
 
 </body>
 </html>

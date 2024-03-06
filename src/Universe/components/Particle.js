@@ -17,7 +17,7 @@ class Particle
         };
         
         this.mesh = new Mesh (
-            new SphereGeometry (this.radius, 14, 14),
+            new SphereGeometry (this.radius, 16, 16),
             new MeshPhysicalMaterial ({ color: color, clearcoat: 0.8 })
         );
 
@@ -77,10 +77,9 @@ class Particle
         return intersecting_external_particles;
     }
 
-    getForceExperiencedFromExternalParticles (external_particles)
+    getForceExperiencedFromExternalParticles (external_particles, gravitational_constant = -1)
     {
         let external_force = { x: 0, y: 0, z: 0 };
-        let G = -1;
 
         let intersecting_particles = this.getAllIntersectingExternalParticles (external_particles);
         intersecting_particles = new Set (intersecting_particles);
@@ -99,14 +98,19 @@ class Particle
 
             distance_pow_3 = (getDistanceBetweenTwoPoints (this.position, interacting_particles[i].position)) ** 3;
 
-            external_force.x += G * this.mass * interacting_particles[i].mass * (this.position.x - interacting_particles[i].position.x) / distance_pow_3;
+            external_force.x += gravitational_constant * this.mass * interacting_particles[i].mass * (this.position.x - interacting_particles[i].position.x) / distance_pow_3;
 
-            external_force.y += G * this.mass * interacting_particles[i].mass * (this.position.y - interacting_particles[i].position.y) / distance_pow_3;
+            external_force.y += gravitational_constant * this.mass * interacting_particles[i].mass * (this.position.y - interacting_particles[i].position.y) / distance_pow_3;
 
-            external_force.z += G * this.mass * interacting_particles[i].mass * (this.position.z - interacting_particles[i].position.z) / distance_pow_3;
+            external_force.z += gravitational_constant * this.mass * interacting_particles[i].mass * (this.position.z - interacting_particles[i].position.z) / distance_pow_3;
         }
 
         return external_force;
+    }
+
+    getInstantSpeed ()
+    {
+        return Math.sqrt ((this.velocity.x)**2 + (this.velocity.y)**2 + (this.velocity.z)**2);
     }
 
     tick (delta)
