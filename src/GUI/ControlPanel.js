@@ -15,14 +15,27 @@ class ControlPanel
 
     setRangeProperty (property, min, max, step, name = null)
     {
-        this.gui.add (this.universe_settings, property, min, max, step).onFinishChange (new_value => 
+        let added_property = this.gui.add (this.universe_settings, property, min, max, step).onFinishChange (new_value => 
         {
             this.universe_settings[property] = new_value;
             if (this.universe != null)
             {
-                console.log (this.universe_settings);
+                // We will reuse the renderer, since we cannot dispose WebGL.
+                let existing_renderer = this.universe.getRenderer();
+                let existing_container = this.universe.container;
+
+                //this.universe.stop ();
+
+                this.universe.updateProperties (this.universe_settings);
+                
+                //this.universe.start ();
             }
         });
+
+        if (name != null)
+        {
+            added_property.name (name);
+        }
     }
 }
 

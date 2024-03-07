@@ -8,7 +8,7 @@ document.addEventListener ("DOMContentLoaded", e =>
 {
 	const universe_settings = {
 		gravitational_constant: -1,
-		global_radius: 200,
+		global_radius: 2000,
 		number_of_particles: 400
 	}
 	
@@ -27,7 +27,8 @@ document.addEventListener ("DOMContentLoaded", e =>
 	});
 
 	const control_panel = new ControlPanel (universe);
-	control_panel.setRangeProperty ('number_of_particles', 1, 1000, 1)
+	control_panel.setRangeProperty ('number_of_particles', 1, 1000, 1, "Número de partículas");
+	control_panel.setRangeProperty ('global_radius', 10, 5000, 50, "Radio del universo");
 
 	universe.start ();
 

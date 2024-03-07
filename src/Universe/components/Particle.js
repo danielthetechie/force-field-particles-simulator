@@ -15,9 +15,13 @@ class Particle
             y: this.force_experienced.y / this.mass,
             z: this.force_experienced.z / this.mass 
         };
+
+        let triangles = 14;
+        if (this.radius > 20) 
+            triangles = 34;
         
         this.mesh = new Mesh (
-            new SphereGeometry (this.radius, 16, 16),
+            new SphereGeometry (this.radius, triangles, triangles),
             new MeshPhysicalMaterial ({ color: color, clearcoat: 0.8 })
         );
 

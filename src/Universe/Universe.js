@@ -20,7 +20,6 @@ class Universe
     constructor ({container, renderer = null, gravitational_constant = -1, global_radius = 200, particles_initial_distance_from_origin = 0, particles_initial_max_speed_per_axis = 0, number_of_particles = 100, max_mass_particles = 10, min_mass_particles = 3 })
     {
         this.gravitational_constant = gravitational_constant;
-        console.log (this.gravitational_constant)
         this.global_radius = global_radius;
         this.particles_initial_distance_from_origin = particles_initial_distance_from_origin;
         this.particles_initial_max_velocity_per_axis = particles_initial_max_speed_per_axis;
@@ -148,9 +147,25 @@ class Universe
         if (index > -1) 
         {
             this.#scene.remove (this.#particles[index].mesh); // Remove mesh from scene.
-            this.#particles[index] = undefined; // Destroy object to free memory.
+            
+            this.#particles[index].mesh.geometry.dispose();
+            this.#particles[index].mesh.material.dispose();
+
+            this.#particles[index] = undefined;
             this.#particles.splice (index, 1); // Remove particle from array.
         }
+    }
+
+    destroyAllParticles ()
+    {
+        for (let i = 0; i < this.#particles.length; i++)
+        {
+            this.destroyParticle (this.#particles[i]);
+        }
+
+        this.#particles = [];
+
+        console.log (this.#particles.length);
     }
 
     bondPairedParticlesAfterInelasticCollision (particle_1, particle_2, color_after_collision = 0x34ebba)
@@ -203,24 +218,49 @@ class Universe
         this.#loop.stop ();
     }
 
-    saveCurrentProperties ()
+    updateProperties ({container, renderer, gravitational_constant, global_radius, particles_initial_distance_from_origin, particles_initial_max_speed_per_axis, number_of_particles, max_mass_particles, min_mass_particles} = {})
     {
+        if (container != null) this.container = container;
+        if (renderer != null) this.renderer = renderer;
+        if (gravitational_constant != null) this.gravitational_constant = gravitational_constant;
+        if (global_radius != null) this.global_radius = global_radius;
+        if (particles_initial_distance_from_origin != null) this.particles_initial_distance_from_origin = particles_initial_distance_from_origin;
+        if (particles_initial_max_speed_per_axis != null) this.particles_initial_max_speed_per_axis = particles_initial_max_speed_per_axis;
+        if (max_mass_particles != null) this.max_mass_particles = max_mass_particles;
+        if (min_mass_particles != null) this.min_mass_particles = min_mass_particles;
 
+        let updated_number_of_particles = number_of_particles;
+        if (updated_number_of_particles == null)
+            updated_number_of_particles = this.#particles.length;
 
+        this.#scene.traverse (object => 
+        {
+            if (object.isMesh) 
+            {
+                if (object.geometry) object.geometry.dispose();
+                if (object.material) {
+                    if (object.material.map) object.material.map.dispose();
+                    object.material.dispose();
+                }
+            }
+        });
+
+        this.destroyAllParticles ();
+        
+        this.addNParticles (updated_number_of_particles);
     }
 
-    load (universe_properties)
-    {
-        console.log (universe_properties);
-    }
+
 
     selfDestroy ()
     {
         this.stop ();
         clearInterval (this.events);
 
-        this.#scene.traverse(object => {
-            if (object.isMesh) {
+        this.#scene.traverse (object => 
+        {
+            if (object.isMesh) 
+            {
                 if (object.geometry) object.geometry.dispose();
                 if (object.material) {
                     if (object.material.map) object.material.map.dispose();
@@ -230,7 +270,7 @@ class Universe
         });
         this.#renderer.dispose();
         
-        // Remove all the object properties
+        // Remove all the universe properties
         for (let prop in this) 
         {
             if (this.hasOwnProperty(prop)) 
