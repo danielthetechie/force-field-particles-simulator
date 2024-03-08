@@ -6,6 +6,7 @@ import { Particle } from './components/Particle.js';
 
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { getRandomNumber, getXYZFromSphericalCoords, getLengthOfN3DVectorsSum } from './helpers/math.js';
+import { removeObjectFromArray, removeMeshFromScene } from './helpers/generic_functions.js';
 
 class Universe 
 {
@@ -143,29 +144,23 @@ class Universe
 
     destroyParticle (particle)
     {
-        const index = this.#particles.indexOf (particle);
-        if (index > -1) 
-        {
-            this.#scene.remove (this.#particles[index].mesh); // Remove mesh from scene.
-            
-            this.#particles[index].mesh.geometry.dispose();
-            this.#particles[index].mesh.material.dispose();
+        
+        const particle_index = this.#particles.indexOf (particle);
+        const particle_mesh = this.#particles[particle_index].mesh;
+        this.#scene = removeMeshFromScene (particle_mesh, this.#scene);
 
-            this.#particles[index] = undefined;
-            this.#particles.splice (index, 1); // Remove particle from array.
-        }
+        this.#particles = removeObjectFromArray (particle, this.#particles);
+        this.#loop.updatables = removeObjectFromArray (particle, this.#loop.updatables);
     }
 
     destroyAllParticles ()
     {
-        for (let i = 0; i < this.#particles.length; i++)
+        for (let i = this.#particles.length - 1; i >= 0; i--) 
         {
-            this.destroyParticle (this.#particles[i]);
+            this.destroyParticle(this.#particles[i]);
         }
 
-        this.#particles = [];
-
-        console.log (this.#particles.length);
+        console.log ("Particles: " + this.#particles.length);
     }
 
     bondPairedParticlesAfterInelasticCollision (particle_1, particle_2, color_after_collision = 0x34ebba)
@@ -195,7 +190,7 @@ class Universe
 
         //paired_particle_radius = Math.max (particle_1.radius, particle_2.radius);
 
-        // Remove particle_ from the universe
+        // Since we have created a new paired particle, we can remove its primary components.
         this.destroyParticle (particle_1);
         this.destroyParticle (particle_2);
 
@@ -206,6 +201,11 @@ class Universe
     getRenderer () 
     {
         return this.#renderer;
+    }
+
+    getNumberOfParticles ()
+    {
+        return this.#particles.length;
     }
 
     start ()
@@ -232,18 +232,6 @@ class Universe
         let updated_number_of_particles = number_of_particles;
         if (updated_number_of_particles == null)
             updated_number_of_particles = this.#particles.length;
-
-        this.#scene.traverse (object => 
-        {
-            if (object.isMesh) 
-            {
-                if (object.geometry) object.geometry.dispose();
-                if (object.material) {
-                    if (object.material.map) object.material.map.dispose();
-                    object.material.dispose();
-                }
-            }
-        });
 
         this.destroyAllParticles ();
         

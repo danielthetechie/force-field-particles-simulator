@@ -8,8 +8,12 @@ document.addEventListener ("DOMContentLoaded", e =>
 {
 	const universe_settings = {
 		gravitational_constant: -1,
-		global_radius: 2000,
-		number_of_particles: 400
+		global_radius: 50,
+		number_of_particles: 3,
+		particles_initial_distance_from_origin: 0,
+		particles_initial_max_speed_per_axis: 0,
+		max_mass_particles: 1000, 
+		min_mass_particles: 100
 	}
 	
 	//control_panel.add (myObject, 'myBoolean' );  // Checkbox
@@ -17,18 +21,23 @@ document.addEventListener ("DOMContentLoaded", e =>
 	let container = document.getElementById ("scene-container");
 	let universe = new Universe ({
 		container: container, 
-		gravitational_constant: universe_settings.gravitational_constant, 
+		gravitational_constant: universe_settings.gravitational_constant,
 		global_radius: universe_settings.global_radius, 
-		particles_initial_distance_from_origin: 0,
-		particles_initial_max_speed_per_axis: 1,
+		particles_initial_distance_from_origin: universe_settings.particles_initial_distance_from_origin,
+		particles_initial_max_speed_per_axis: universe_settings.particles_initial_max_speed_per_axis,
 		number_of_particles: universe_settings.number_of_particles, 
-		max_mass_particles: 1000, 
-		min_mass_particles: 100
+		max_mass_particles: universe_settings.max_mass_particles,
+		min_mass_particles: universe_settings.min_mass_particles
 	});
 
 	const control_panel = new ControlPanel (universe);
-	control_panel.setRangeProperty ('number_of_particles', 1, 1000, 1, "Número de partículas");
+	control_panel.setRangeProperty ('gravitational_constant', -50, 50, 1, "Constante de fuerza");
 	control_panel.setRangeProperty ('global_radius', 10, 5000, 50, "Radio del universo");
+	control_panel.setRangeProperty ('particles_initial_distance_from_origin', 0, 1000, "Distancia mínima al centro del universo");
+	control_panel.setRangeProperty ('particles_initial_max_speed_per_axis', 0, 10, 1, "Velocidad inicial aleatoria máxima de las partículas");
+	control_panel.setRangeProperty ('number_of_particles', 1, 1000, 1, "Número inicial de partículas");
+	control_panel.setRangeProperty ('max_mass_particles', 1, 1000, "Masa aleatoria máxima de las partículas");
+	control_panel.setRangeProperty ('min_mass_particles', 1, 1000, "Masa aleatoria mínima de las partículas");
 
 	universe.start ();
 
@@ -43,61 +52,4 @@ document.addEventListener ("DOMContentLoaded", e =>
 			system_average_speed.innerHTML = universe.variables_info.get ("system_average_speed");
 		}
 	}, 300);
-	
-	/*control_panel.add (universe_settings, 'global_radius', 1, 5000, 10).onFinishChange ((new_global_radius) => 
-	{
-		universe_settings.global_radius = new_global_radius;
-
-		if (universe != null)
-		{
-			// We will reuse the renderer, since we cannot dispose WebGL.
-			let existing_renderer = universe.getRenderer();
-
-			universe.selfDestroy ();
-			universe = null;
-			//clearInterval (info_interval);
-	
-			universe = new Universe ({
-				container: container,
-				renderer: existing_renderer,
-				gravitational_constant: universe_settings.gravitational_constant,
-				global_radius: new_global_radius, 
-				particles_initial_distance_from_origin: 0,
-				particles_initial_max_speed_per_axis: 0,
-				number_of_particles: universe_settings.number_of_particles,
-				max_mass_particles: 10, 
-				min_mass_particles: 3
-			});
-		
-			universe.start ();
-		}
-	});
-
-	control_panel.add (universe_settings, 'number_of_particles', 1, 1000, 1).onFinishChange (new_number_of_particles => 
-	{
-		universe_settings.number_of_particles = new_number_of_particles;
-		if (universe != null)
-		{
-			// We will reuse the renderer, since we cannot dispose WebGL.
-			let existing_renderer = universe.getRenderer();
-
-			universe.selfDestroy ();
-			universe = null;
-			//clearInterval (info_interval);
-	
-			universe = new Universe ({
-				container: container,
-				renderer: existing_renderer,
-				gravitational_constant: universe_settings.gravitational_constant,
-				global_radius: universe_settings.global_radius, 
-				particles_initial_distance_from_origin: 0,
-				particles_initial_max_speed_per_axis: 0,
-				number_of_particles: universe_settings.number_of_particles,
-				max_mass_particles: 10, 
-				min_mass_particles: 3
-			});
-		
-			universe.start ();
-		}
-	});*/
 });

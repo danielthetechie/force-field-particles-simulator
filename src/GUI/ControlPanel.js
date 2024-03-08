@@ -7,9 +7,13 @@ class ControlPanel
         this.gui = new GUI ();
         this.universe = universe;
         this.universe_settings = {
-            gravitational_constant: -1,
-            global_radius: 200,
-            number_of_particles: 400
+            gravitational_constant: this.universe.gravitational_constant,
+            global_radius: this.universe.global_radius,
+            particles_initial_distance_from_origin: this.universe.particles_initial_distance_from_origin,
+            particles_initial_max_speed_per_axis: this.universe.particles_initial_max_speed_per_axis,
+            number_of_particles: this.universe.number_of_particles, 
+            max_mass_particles: this.universe.max_mass_particles,
+            min_mass_particles: this.universe.min_mass_particles
         }
     }
 
@@ -24,11 +28,11 @@ class ControlPanel
                 let existing_renderer = this.universe.getRenderer();
                 let existing_container = this.universe.container;
 
-                //this.universe.stop ();
+                this.universe.stop ();
 
                 this.universe.updateProperties (this.universe_settings);
                 
-                //this.universe.start ();
+                this.universe.start ();
             }
         });
 
