@@ -23,7 +23,7 @@ class Universe
         this.gravitational_constant = gravitational_constant;
         this.global_radius = global_radius;
         this.particles_initial_distance_from_origin = particles_initial_distance_from_origin;
-        this.particles_initial_max_velocity_per_axis = particles_initial_max_speed_per_axis;
+        this.particles_initial_max_speed_per_axis = particles_initial_max_speed_per_axis;
 
         if (this.particles_initial_distance_from_origin >= this.global_radius)
         {
@@ -129,12 +129,12 @@ class Universe
                 z: 0
             };
 
-            if (this.particles_initial_max_velocity_per_axis != 0)
+            if (this.particles_initial_max_speed_per_axis != 0)
             {
                 particle_velocity = {
-                    x: getRandomNumber (-this.particles_initial_max_velocity_per_axis, this.particles_initial_max_velocity_per_axis),
-                    y: getRandomNumber (-this.particles_initial_max_velocity_per_axis, this.particles_initial_max_velocity_per_axis), 
-                    z: getRandomNumber (-this.particles_initial_max_velocity_per_axis, this.particles_initial_max_velocity_per_axis)
+                    x: getRandomNumber (-this.particles_initial_max_speed_per_axis, this.particles_initial_max_speed_per_axis),
+                    y: getRandomNumber (-this.particles_initial_max_speed_per_axis, this.particles_initial_max_speed_per_axis), 
+                    z: getRandomNumber (-this.particles_initial_max_speed_per_axis, this.particles_initial_max_speed_per_axis)
                 };
             }
 
@@ -159,8 +159,6 @@ class Universe
         {
             this.destroyParticle(this.#particles[i]);
         }
-
-        console.log ("Particles: " + this.#particles.length);
     }
 
     bondPairedParticlesAfterInelasticCollision (particle_1, particle_2, color_after_collision = 0x34ebba)

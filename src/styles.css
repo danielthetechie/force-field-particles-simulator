@@ -21,3 +21,21 @@ canvas {
     width: 100vw !important;
     height: 100vh !important;
 }
+
+/*=====================*/
+/*=== Control panel ===*/
+/*=====================*/
+.lil-gui.root {
+    width:320px;
+}
+
+.lil-gui .controller {
+    min-height:32px;
+    padding-top:3px;
+    padding-bottom:3px;
+}
+
+.lil-gui .controller > .name {
+    line-height:1.45em;
+}
+/*=====================*/

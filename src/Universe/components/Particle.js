@@ -17,7 +17,7 @@ class Particle
         };
 
         let triangles = 14;
-        if (this.radius > 20) 
+        if (this.radius > 15) 
             triangles = 34;
         
         this.mesh = new Mesh (

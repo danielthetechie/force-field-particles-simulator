@@ -8,8 +8,8 @@ document.addEventListener ("DOMContentLoaded", e =>
 {
 	const universe_settings = {
 		gravitational_constant: -1,
-		global_radius: 50,
-		number_of_particles: 3,
+		global_radius: 500,
+		number_of_particles: 100,
 		particles_initial_distance_from_origin: 0,
 		particles_initial_max_speed_per_axis: 0,
 		max_mass_particles: 1000, 
@@ -30,14 +30,7 @@ document.addEventListener ("DOMContentLoaded", e =>
 		min_mass_particles: universe_settings.min_mass_particles
 	});
 
-	const control_panel = new ControlPanel (universe);
-	control_panel.setRangeProperty ('gravitational_constant', -50, 50, 1, "Constante de fuerza");
-	control_panel.setRangeProperty ('global_radius', 10, 5000, 50, "Radio del universo");
-	control_panel.setRangeProperty ('particles_initial_distance_from_origin', 0, 1000, "Distancia mínima al centro del universo");
-	control_panel.setRangeProperty ('particles_initial_max_speed_per_axis', 0, 10, 1, "Velocidad inicial aleatoria máxima de las partículas");
-	control_panel.setRangeProperty ('number_of_particles', 1, 1000, 1, "Número inicial de partículas");
-	control_panel.setRangeProperty ('max_mass_particles', 1, 1000, "Masa aleatoria máxima de las partículas");
-	control_panel.setRangeProperty ('min_mass_particles', 1, 1000, "Masa aleatoria mínima de las partículas");
+	new ControlPanel (universe);
 
 	universe.start ();
 
