@@ -161,7 +161,7 @@ class Universe
         }
     }
 
-    bondPairedParticlesAfterInelasticCollision (particle_1, particle_2, color_after_collision = 0x34ebba)
+    bondPairedParticlesAfterInelasticCollision (particle_1, particle_2, enlarge_radius_after_bonding = false, color_after_collision = 0x34ebba)
     {
         if (particle_1 === particle_2) return;
 
@@ -184,9 +184,14 @@ class Universe
         };
 
         let paired_particle_mass = particle_1.mass + particle_2.mass;
-        let paired_particle_radius = Math.max (particle_1.radius, particle_2.radius) + Math.min (particle_1.radius, particle_2.radius)/10;
 
-        //paired_particle_radius = Math.max (particle_1.radius, particle_2.radius);
+        let paired_particle_radius;
+        if (enlarge_radius_after_bonding) 
+        {
+            paired_particle_radius = Math.max (particle_1.radius, particle_2.radius) + Math.min (particle_1.radius, particle_2.radius)/10;
+        } else {
+            paired_particle_radius = Math.max (particle_1.radius, particle_2.radius);   
+        }
 
         // Since we have created a new paired particle, we can remove its primary components.
         this.destroyParticle (particle_1);

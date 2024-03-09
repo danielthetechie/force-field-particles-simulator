@@ -22,7 +22,7 @@ class ControlPanel
         this.setRangeProperty ('particles_initial_max_speed_per_axis', 0, 10, 1, "Velocidad inicial aleatoria\nmáxima de las partículas");
         this.setRangeProperty ('number_of_particles', 1, 1000, 1, "Número inicial de partículas");
         this.setRangeProperty ('max_mass_particles', 1, 1000, 10, "Masa aleatoria máxima\nde las partículas");
-        this.setRangeProperty ('min_mass_particles', 1, 1000, 10, "Masa aleatoria mínima\nde las partículas (%)");
+        this.setRangeProperty ('min_mass_particles', 1, 100, 1, "Masa aleatoria mínima\nde las partículas (%)");
     }
 
     setRangeProperty (property, min, max, step, name = null)
@@ -65,35 +65,3 @@ class ControlPanel
 }
 
 export { ControlPanel }
-
-/*
-control_panel.add (universe_settings, 'gravitational_constant', -100, 100, 1)
-	.name ('Constante de fuerza')
-	.onFinishChange (new_gravitational_constant => 
-	{
-		universe_settings.gravitational_constant = new_gravitational_constant;
-
-		if (universe != null)
-		{
-			// We will reuse the renderer, since we cannot dispose WebGL.
-			let existing_renderer = universe.getRenderer();
-
-			universe.selfDestroy ();
-			universe = null;
-			//clearInterval (info_interval);
-	
-			universe = new Universe ({
-				container: container,
-				renderer: existing_renderer,
-				gravitational_constant: universe_settings.gravitational_constant,
-				global_radius: universe_settings.global_radius,
-				particles_initial_distance_from_origin: 0,
-				particles_initial_max_speed_per_axis: 0,
-				number_of_particles: universe_settings.number_of_particles, 
-				max_mass_particles: 10, 
-				min_mass_particles: 3
-			});
-		
-			universe.start ();
-		}
-	});*/
