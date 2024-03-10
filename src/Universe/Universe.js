@@ -18,7 +18,7 @@ class Universe
     #particles;
     #controls;
 
-    constructor ({container, renderer = null, gravitational_constant = -1, global_radius = 200, particles_initial_distance_from_origin = 0, particles_initial_max_speed_per_axis = 0, number_of_particles = 100, max_mass_particles = 10, min_mass_particles = 3 })
+    constructor ({container, renderer = null, gravitational_constant = -1, global_radius = 200, particles_initial_distance_from_origin = 0, particles_initial_max_speed_per_axis = 0, number_of_particles = 100, max_mass_particles = 10, min_mass_particles = 3, enlarge_radius_after_bonding = true })
     {
         this.gravitational_constant = gravitational_constant;
         this.global_radius = global_radius;
@@ -35,6 +35,8 @@ class Universe
 
         this.max_particle_density = 22.5; // Osmium density
         this.min_particle_density = 1; // Water density
+
+        this.enlarge_radius_after_bonding = enlarge_radius_after_bonding;
 
         this.#scene = new Scene ({ background:0x040404 });
         this.#light = new AmbientLight (0xeb9b34, 3);
@@ -187,7 +189,7 @@ class Universe
         this.#loop.stop ();
     }
 
-    updateProperties ({container, renderer, gravitational_constant, global_radius, particles_initial_distance_from_origin, particles_initial_max_speed_per_axis, number_of_particles, max_mass_particles, min_mass_particles} = {})
+    updateProperties ({container, renderer, gravitational_constant, global_radius, particles_initial_distance_from_origin, particles_initial_max_speed_per_axis, number_of_particles, max_mass_particles, min_mass_particles, enlarge_radius_after_bonding} = {})
     {
         if (container != null) this.container = container;
         if (renderer != null) this.renderer = renderer;
@@ -195,19 +197,16 @@ class Universe
         if (global_radius != null) this.global_radius = global_radius;
         if (particles_initial_distance_from_origin != null) this.particles_initial_distance_from_origin = particles_initial_distance_from_origin;
         if (particles_initial_max_speed_per_axis != null) this.particles_initial_max_speed_per_axis = particles_initial_max_speed_per_axis;
+        if (number_of_particles != null) this.number_of_particles = number_of_particles;
         if (max_mass_particles != null) this.max_mass_particles = max_mass_particles;
         if (min_mass_particles != null) this.min_mass_particles = min_mass_particles;
-
-        let updated_number_of_particles = number_of_particles;
-        if (updated_number_of_particles == null)
-            updated_number_of_particles = this.#particles.length;
+        if (enlarge_radius_after_bonding != null) this.enlarge_radius_after_bonding = enlarge_radius_after_bonding;
 
         this.destroyAllParticles ();
-        
-        this.addNParticles (updated_number_of_particles);
+        this.addNParticles (this.number_of_particles);
     }
 
-    tick (delta)
+    tick (delta = null)
     {
         let intersected_particle = null;
         let system_average_speed = 0;
@@ -218,7 +217,7 @@ class Universe
             if (intersected_particle != null)
             {
                 // Collision happened
-                this.bondPairedParticlesAfterInelasticCollision (this.#particles[i],intersected_particle);
+                this.bondPairedParticlesAfterInelasticCollision (this.#particles[i], intersected_particle, this.enlarge_radius_after_bonding);
             } else {
                 // No collision, so there is a force between them.
                 let force_experienced = 0;
@@ -252,6 +251,12 @@ class Universe
         this.variables_info.set ("system_average_speed", (system_average_speed / this.#particles.length).toFixed (2));
     }
 
+    restart (properties)
+    {
+        this.stop ();
+        this.updateProperties (properties);
+        this.start ();
+    }
 
     selfDestroy ()
     {

@@ -10,7 +10,8 @@ document.addEventListener ("DOMContentLoaded", e =>
 		particles_initial_distance_from_origin: 10,
 		particles_initial_max_speed_per_axis: 0,
 		max_mass_particles: 1000, 
-		min_mass_particles: 100
+		min_mass_particles: 10,
+		enlarge_radius_after_bonding: true
 	}
 	
 	let container = document.getElementById ("scene-container");

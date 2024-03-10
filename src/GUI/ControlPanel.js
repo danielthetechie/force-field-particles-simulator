@@ -4,7 +4,7 @@ class ControlPanel
 {
     constructor (universe)
     {
-        this.gui = new GUI ();
+        this.gui = new GUI ({ title: "Panel de control" });
         this.universe = universe;
         this.universe_settings = {
             gravitational_constant: this.universe.gravitational_constant,
@@ -13,16 +13,33 @@ class ControlPanel
             particles_initial_max_speed_per_axis: this.universe.particles_initial_max_speed_per_axis,
             number_of_particles: this.universe.getNumberOfParticles (), 
             max_mass_particles: this.universe.max_mass_particles,
-            min_mass_particles: this.universe.min_mass_particles
+            min_mass_particles: this.universe.min_mass_particles,
+            enlarge_radius_after_bonding: this.universe.enlarge_radius_after_bonding
         }
 
         this.setRangeProperty ('gravitational_constant', -10, 10, 1, "Constante de fuerza");
-        this.setRangeProperty ('global_radius', 10, 5000, 50, "Radio del universo");
+        this.setRangeProperty ('global_radius', 10, 3000, 50, "Radio del universo");
         this.setRangeProperty ('particles_initial_distance_from_origin', 0, 100, 1, "Distancia mínima al\ncentro del universo (%)");
-        this.setRangeProperty ('particles_initial_max_speed_per_axis', 0, 10, 1, "Velocidad inicial aleatoria\nmáxima de las partículas");
+        this.setRangeProperty ('particles_initial_max_speed_per_axis', 0, 20, 1, "Velocidad inicial aleatoria\nmáxima de las partículas");
         this.setRangeProperty ('number_of_particles', 1, 1000, 1, "Número inicial de partículas");
         this.setRangeProperty ('max_mass_particles', 1, 1000, 10, "Masa aleatoria máxima\nde las partículas");
         this.setRangeProperty ('min_mass_particles', 1, 100, 1, "Masa aleatoria mínima\nde las partículas (%)");
+
+        this.setBooleanProperty ('enlarge_radius_after_bonding', "Aumentar tamaño de las\npartículas compuestas")
+    }
+
+    setBooleanProperty (property, name = null)
+    {
+        let added_property = this.gui.add (this.universe_settings, property).onFinishChange (new_value => 
+        {
+            this.universe_settings[property] = new_value;
+            this.universe.restart (this.universe_settings);
+        });
+
+        if (name != null)
+        {
+            added_property.name (name);
+        }
     }
 
     setRangeProperty (property, min, max, step, name = null)
@@ -42,19 +59,7 @@ class ControlPanel
             }
             
             this.universe_settings[property] = new_value;
-
-            if (this.universe != null)
-            {
-                // We will reuse the renderer, since we cannot dispose WebGL.
-                let existing_renderer = this.universe.getRenderer();
-                let existing_container = this.universe.container;
-
-                this.universe.stop ();
-
-                this.universe.updateProperties (this.universe_settings);
-                
-                this.universe.start ();
-            }
+            this.universe.restart (this.universe_settings);
         });
 
         if (name != null)
