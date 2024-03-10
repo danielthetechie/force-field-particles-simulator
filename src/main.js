@@ -5,11 +5,11 @@ document.addEventListener ("DOMContentLoaded", e =>
 {
 	const universe_settings = {
 		gravitational_constant: -1,
-		global_radius: 500,
+		global_radius: 600,
 		number_of_particles: 300,
 		particles_initial_distance_from_origin: 10,
 		particles_initial_max_speed_per_axis: 0,
-		max_mass_particles: 1000, 
+		max_mass_particles: 300, 
 		min_mass_particles: 10,
 		enlarge_radius_after_bonding: true
 	}
