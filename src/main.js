@@ -1,9 +1,6 @@
 import { Universe } from "./Universe/Universe.js";
 import { ControlPanel } from "./GUI/ControlPanel.js";
 
-//const control_panel = new GUI ();
-
-
 document.addEventListener ("DOMContentLoaded", e => 
 {
 	const universe_settings = {
@@ -36,5 +33,5 @@ document.addEventListener ("DOMContentLoaded", e =>
 			remaining_particles_value.innerHTML = universe.variables_info.get ("remaining_particles");
 			system_average_speed.innerHTML = universe.variables_info.get ("system_average_speed");
 		}
-	}, 300);
+	}, 10);
 });

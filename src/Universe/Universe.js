@@ -54,45 +54,11 @@ class Universe
         this.variables_info = new Map ();
 
         this.#particles = [];
-        //this.addParticle (null, null, 20, 50000, 0x456672);
         this.addNParticles (number_of_particles);
 
         this.variables_info.set ("remaining_particles", this.#particles.length);
 
-        this.events = setInterval (()=> 
-        {
-            let intersected_particle = null;
-            let system_total_speed = 0;
-            for (let i = 0; i < this.#particles.length; i++)
-            {
-                intersected_particle = this.#particles[i].getFirstIntersectingExternalParticle (this.#particles);
-
-                if (intersected_particle != null)
-                {
-                    // Collision happened
-                    this.bondPairedParticlesAfterInelasticCollision (this.#particles[i],intersected_particle);
-                } else {
-                    // No collision, so there is a force between them.
-                    let force_experienced = 0;
-                    force_experienced = this.#particles[i].getForceExperiencedFromExternalParticles (this.#particles, this.gravitational_constant);
-
-                    this.#particles[i].force_experienced.x = force_experienced.x;
-                    this.#particles[i].force_experienced.y = force_experienced.y;
-                    this.#particles[i].force_experienced.z = force_experienced.z;
-
-                    this.#particles[i].acceleration = { 
-                        x: this.#particles[i].force_experienced.x / this.#particles[i].mass, 
-                        y: this.#particles[i].force_experienced.y / this.#particles[i].mass,
-                        z: this.#particles[i].force_experienced.z / this.#particles[i].mass 
-                    };
-                }
-
-                system_total_speed += this.#particles[i].getInstantSpeed ();
-            }
-
-            this.variables_info.set ("remaining_particles", this.#particles.length);
-            this.variables_info.set ("system_average_speed", (system_total_speed / this.#particles.length).toFixed (2));
-        }, 100);
+        this.#loop.updatables.push (this);
 
         new Resizer (container, this.#camera, this.#renderer).setSize ();
     }
@@ -241,12 +207,55 @@ class Universe
         this.addNParticles (updated_number_of_particles);
     }
 
+    tick (delta)
+    {
+        let intersected_particle = null;
+        let system_average_speed = 0;
+        for (let i = 0; i < this.#particles.length; i++)
+        {
+            intersected_particle = this.#particles[i].getFirstIntersectingExternalParticle (this.#particles);
+
+            if (intersected_particle != null)
+            {
+                // Collision happened
+                this.bondPairedParticlesAfterInelasticCollision (this.#particles[i],intersected_particle);
+            } else {
+                // No collision, so there is a force between them.
+                let force_experienced = 0;
+                force_experienced = this.#particles[i].getForceExperiencedFromExternalParticles (this.#particles, this.gravitational_constant);
+
+                this.#particles[i].force_experienced.x = force_experienced.x;
+                this.#particles[i].force_experienced.y = force_experienced.y;
+                this.#particles[i].force_experienced.z = force_experienced.z;
+
+                this.#particles[i].acceleration = { 
+                    x: this.#particles[i].force_experienced.x / this.#particles[i].mass, 
+                    y: this.#particles[i].force_experienced.y / this.#particles[i].mass,
+                    z: this.#particles[i].force_experienced.z / this.#particles[i].mass 
+                };
+            }
+
+            /*
+            * Sometimes, when the particles get bonded together (and thus, their original
+            * references are removed), we can't calculate the average system speed based
+            * on them, so we just wait till the next frame to attempt the calculation again.
+            */
+
+            try {
+                system_average_speed += this.#particles[i].getInstantSpeed ();
+            } catch {
+                // Just wait till the next frame.
+            }
+        }
+
+        this.variables_info.set ("remaining_particles", this.#particles.length);
+        this.variables_info.set ("system_average_speed", (system_average_speed / this.#particles.length).toFixed (2));
+    }
 
 
     selfDestroy ()
     {
         this.stop ();
-        clearInterval (this.events);
 
         this.#scene.traverse (object => 
         {
