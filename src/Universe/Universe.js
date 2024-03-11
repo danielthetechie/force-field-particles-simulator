@@ -112,7 +112,6 @@ class Universe
 
     destroyParticle (particle)
     {
-        
         const particle_index = this.#particles.indexOf (particle);
         const particle_mesh = this.#particles[particle_index].mesh;
         this.#scene = removeMeshFromScene (particle_mesh, this.#scene);
@@ -129,7 +128,7 @@ class Universe
         }
     }
 
-    bondPairedParticlesAfterInelasticCollision (particle_1, particle_2, enlarge_radius_after_bonding = false, color_after_collision = 0x34ebba)
+    bondPairedParticlesAfterInelasticCollision (particle_1, particle_2, color_after_collision = 0x34ebba)
     {
         if (particle_1 === particle_2) return;
 
@@ -152,20 +151,13 @@ class Universe
         };
 
         let paired_particle_mass = particle_1.mass + particle_2.mass;
-
-        let paired_particle_radius;
-        if (enlarge_radius_after_bonding) 
-        {
-            paired_particle_radius = Math.max (particle_1.radius, particle_2.radius) + Math.min (particle_1.radius, particle_2.radius)/10;
-        } else {
-            paired_particle_radius = Math.max (particle_1.radius, particle_2.radius);   
-        }
+        
+        let paired_particle_radius = Math.cbrt ((particle_1.radius ** 3) + (particle_2.radius **3));
 
         // Since we have created a new paired particle, we can remove its primary components.
         this.destroyParticle (particle_1);
         this.destroyParticle (particle_2);
 
-        // Add the new combined particle with properties of both particles
         this.addParticle (paired_particle_position, paired_particle_velocity, paired_particle_radius, paired_particle_mass, color_after_collision);
     }
 
@@ -189,7 +181,7 @@ class Universe
         this.#loop.stop ();
     }
 
-    updateProperties ({container, renderer, gravitational_constant, global_radius, particles_initial_distance_from_origin, particles_initial_max_speed_per_axis, number_of_particles, max_mass_particles, min_mass_particles, enlarge_radius_after_bonding} = {})
+    updateProperties ({container, renderer, gravitational_constant, global_radius, particles_initial_distance_from_origin, particles_initial_max_speed_per_axis, number_of_particles, max_mass_particles, min_mass_particles} = {})
     {
         if (container != null) this.container = container;
         if (renderer != null) this.renderer = renderer;
@@ -200,7 +192,6 @@ class Universe
         if (number_of_particles != null) this.number_of_particles = number_of_particles;
         if (max_mass_particles != null) this.max_mass_particles = max_mass_particles;
         if (min_mass_particles != null) this.min_mass_particles = min_mass_particles;
-        if (enlarge_radius_after_bonding != null) this.enlarge_radius_after_bonding = enlarge_radius_after_bonding;
 
         this.destroyAllParticles ();
         this.addNParticles (this.number_of_particles);
@@ -217,7 +208,7 @@ class Universe
             if (intersected_particle != null)
             {
                 // Collision happened
-                this.bondPairedParticlesAfterInelasticCollision (this.#particles[i], intersected_particle, this.enlarge_radius_after_bonding);
+                this.bondPairedParticlesAfterInelasticCollision (this.#particles[i], intersected_particle);
             } else {
                 // No collision, so there is a force between them.
                 let force_experienced = 0;
@@ -234,11 +225,11 @@ class Universe
                 };
             }
 
-            /*
-            * Sometimes, when the particles get bonded together (and thus, their original
-            * references are removed), we can't calculate the average system speed based
-            * on them, so we just wait till the next frame to attempt the calculation again.
-            */
+            /**
+             * Sometimes, when the particles get bonded together (and thus, their original
+             * references are removed), we can't calculate the average system speed based
+             * on them, so we just wait till the next frame to attempt the calculation again.
+             */
 
             try {
                 system_average_speed += this.#particles[i].getInstantSpeed ();
