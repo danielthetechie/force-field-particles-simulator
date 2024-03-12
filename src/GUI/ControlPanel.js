@@ -33,11 +33,11 @@ class ControlPanel
 
         this.setRangeProperty ('gravitational_constant', -10, 10, 1, "Constante de fuerza");
         this.global_radius_property = this.setRangeProperty ('global_radius', 10, 3000, 50, "Radio del universo");
-        this.particles_inicial_distance_from_origin = this.setRangeProperty ('particles_initial_distance_from_origin', 0, 100, 1, "Distancia mínima al\ncentro del universo (%)");
+        this.particles_inicial_distance_from_origin = this.setRangeProperty ('particles_initial_distance_from_origin', 0, 100, 1, "Distancia mínima al\ncentro del universo");
         this.setRangeProperty ('particles_initial_max_speed_per_axis', 0, 20, 1, "Velocidad inicial aleatoria\nmáxima de las partículas");
         this.setRangeProperty ('number_of_particles', 1, 1000, 1, "Número inicial de partículas");
         this.max_mass_particles_property = this.setRangeProperty ('max_mass_particles', 1, 1000, 10, "Masa aleatoria máxima\nde las partículas");
-        this.min_mass_particles_property = this.setRangeProperty ('min_mass_particles', 1, 100, 1, "Masa aleatoria mínima\nde las partículas (%)");
+        this.min_mass_particles_property = this.setRangeProperty ('min_mass_particles', 1, 100, 1, "Masa aleatoria mínima\nde las partículas");
 
         this.dependentMinMaxProperties = new Map ();
         this.dependentMinMaxProperties.set (this.min_mass_particles_property, this.max_mass_particles_property);
