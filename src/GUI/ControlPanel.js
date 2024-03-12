@@ -1,4 +1,5 @@
 import GUI from 'lil-gui';
+import { normalize } from 'three/src/math/MathUtils';
 
 /**
  * By default, step(1) -> 120 points, step (0.1) -> 12 points, etc.,
@@ -8,7 +9,10 @@ import GUI from 'lil-gui';
  */
 function normalizeMouseWheelStep (e, desired_step)
 {
-    return desired_step * (-e.deltaY / 120);
+    let normalized_step = desired_step * (-e.deltaY / 120);
+    if (normalized_step < 1) normalized_step = 1;
+    
+    return normalized_step;
 }
 
 class ControlPanel
@@ -28,12 +32,16 @@ class ControlPanel
         }
 
         this.setRangeProperty ('gravitational_constant', -10, 10, 1, "Constante de fuerza");
-        this.setRangeProperty ('global_radius', 10, 3000, 50, "Radio del universo");
-        this.setRangeProperty ('particles_initial_distance_from_origin', 0, 100, 1, "Distancia mínima al\ncentro del universo (%)");
+        this.global_radius_property = this.setRangeProperty ('global_radius', 10, 3000, 50, "Radio del universo");
+        this.particles_inicial_distance_from_origin = this.setRangeProperty ('particles_initial_distance_from_origin', 0, 100, 1, "Distancia mínima al\ncentro del universo (%)");
         this.setRangeProperty ('particles_initial_max_speed_per_axis', 0, 20, 1, "Velocidad inicial aleatoria\nmáxima de las partículas");
         this.setRangeProperty ('number_of_particles', 1, 1000, 1, "Número inicial de partículas");
-        this.setRangeProperty ('max_mass_particles', 1, 1000, 10, "Masa aleatoria máxima\nde las partículas");
-        this.setRangeProperty ('min_mass_particles', 1, 100, 1, "Masa aleatoria mínima\nde las partículas (%)");
+        this.max_mass_particles_property = this.setRangeProperty ('max_mass_particles', 1, 1000, 10, "Masa aleatoria máxima\nde las partículas");
+        this.min_mass_particles_property = this.setRangeProperty ('min_mass_particles', 1, 100, 1, "Masa aleatoria mínima\nde las partículas (%)");
+
+        this.dependentMinMaxProperties = new Map ();
+        this.dependentMinMaxProperties.set (this.min_mass_particles_property, this.max_mass_particles_property);
+        this.dependentMinMaxProperties.set (this.particles_inicial_distance_from_origin, this.global_radius_property);
 
         //this.setBooleanProperty ('enlarge_radius_after_bonding', "Aumentar tamaño de las\npartículas compuestas")
     }
@@ -54,23 +62,14 @@ class ControlPanel
 
     setRangeProperty (property, min, max, step, name = null)
     {
-        let added_property = this.gui.add (this.universe_settings, property, min, max, step).onFinishChange (new_value => 
+        let added_property = this.gui.add (this.universe_settings, property, min, max, step).onFinishChange (value_read => 
         {
-            switch (property) 
-            {
-                case 'particles_initial_distance_from_origin':
-                    new_value = Math.floor (this.universe_settings.global_radius * (new_value / 100));
-                    break;
-                case 'min_mass_particles':
-                    new_value = Math.floor (this.universe_settings.max_mass_particles * (new_value / 100));
-                    break;
-                default:
-                    break;
-            }
-            
-            this.universe_settings[property] = new_value;
+            this.universe_settings[property] = value_read;
+            this.updateDependentMinMaxProperties (value_read);
             this.universe.restart (this.universe_settings);
         });
+
+        added_property.decimals (0);
 
         /*
         added_property.domElement.addEventListener("wheel", (e) => 
@@ -80,14 +79,31 @@ class ControlPanel
             let current_value = this.universe_settings[property];
             console.log (current_value)
             //added_property.setValue (current_value + wheel_step);
-        }, { passive: false });
-        */
+        }, { passive: false });*/
+        
 
         if (name != null)
         {
             added_property.name (name);
         }
+
+        return added_property;
     }
+
+    /**
+     * To avoid having minimum values higher than their maximum counterparts.
+     * For example, the max value of min_mass_particles will be equalized to 
+     * the max_mass_particles current selected value.
+     */ 
+    updateDependentMinMaxProperties (value_read) 
+    {
+        let max_value = value_read;
+        this.dependentMinMaxProperties.forEach ((max_property, min_property) => 
+        {
+            console.log (max_property, min_property);
+            min_property.max (value_read);
+        });
+    }    
 }
 
 export { ControlPanel }
