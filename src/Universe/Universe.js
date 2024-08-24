@@ -1,4 +1,4 @@
-import { Scene, PerspectiveCamera, AmbientLight, Vector3 } from 'three';
+import { Scene, PerspectiveCamera, Vector3, MeshBasicMaterial, Color } from 'three';
 import { Loop } from './systems/Loop.js';
 import { Renderer } from './systems/Renderer.js';
 import { Resizer } from './systems/Resizer.js';
@@ -10,7 +10,7 @@ import { removeObjectFromArray, removeMeshFromScene } from './helpers/generic_fu
 
 class Universe 
 {
-    #light;
+    //#light;
     #scene;
     #camera;
     #renderer;
@@ -20,6 +20,7 @@ class Universe
 
     constructor ({container, renderer = null, gravitational_constant = -1, global_radius = 200, particles_initial_distance_from_origin = 0, particles_initial_max_speed_per_axis = 0, number_of_particles = 100, max_mass_particles = 10, min_mass_particles = 3, enlarge_radius_after_bonding = true })
     {
+		this.particles_material = new MeshBasicMaterial ();
         this.gravitational_constant = gravitational_constant;
         this.global_radius = global_radius;
         this.particles_initial_distance_from_origin = particles_initial_distance_from_origin;
@@ -39,7 +40,7 @@ class Universe
         this.enlarge_radius_after_bonding = enlarge_radius_after_bonding;
 
         this.#scene = new Scene ({ background:0x040404 });
-        this.#light = new AmbientLight (0xeb9b34, 3);
+        //this.#light = new AmbientLight (0xeb9b34, 3);
 
         this.#renderer = renderer || new Renderer ();
         container.append (this.#renderer.domElement);
@@ -51,7 +52,7 @@ class Universe
 
         this.#loop = new Loop (this.#camera, this.#scene, this.#renderer);
 
-        this.#scene.add (this.#light, this.#camera);
+        this.#scene.add (this.#camera);
 
         this.variables_info = new Map ();
 
@@ -67,10 +68,12 @@ class Universe
 
     addParticle (position, velocity, radius, mass, color)
     {
-        let particle = new Particle (position, velocity, radius, mass, color)
+        let particle = new Particle (this.particles_material, position, velocity, radius, mass);
+		
+		particle.mesh.material.color = new Color (color);
+
         this.#particles.push (particle);
         this.#scene.add (particle.mesh);
-
         this.#loop.updatables.push (particle);
 
         return particle;
@@ -107,6 +110,7 @@ class Universe
             }
 
             this.addParticle (particle_position, particle_velocity, particle_radius, particle_mass);
+
         }
     }
 
@@ -159,6 +163,7 @@ class Universe
         this.destroyParticle (particle_2);
 
         this.addParticle (paired_particle_position, paired_particle_velocity, paired_particle_radius, paired_particle_mass, color_after_collision);
+
     }
 
     getRenderer () 

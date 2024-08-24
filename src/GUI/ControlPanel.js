@@ -100,7 +100,7 @@ class ControlPanel
         let max_value = value_read;
         this.dependentMinMaxProperties.forEach ((max_property, min_property) => 
         {
-            console.log (max_property, min_property);
+            //console.log (max_property, min_property);
             min_property.max (value_read);
         });
     }    

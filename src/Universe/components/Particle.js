@@ -1,9 +1,9 @@
-import { SphereGeometry, Mesh, MeshPhysicalMaterial } from "three";
+import { Mesh, SphereGeometry } from "three";
 import { getDistanceBetweenTwoPoints } from "../helpers/math.js";
 
 class Particle
 {
-    constructor (position = null, velocity = null, radius = 1, mass = 5, color = 0xff0000)
+    constructor (material, position = null, velocity = null, radius = 1, mass = 5, color = 0xff0000)
     {
         this.position = position == null ? { x: 0, y: 0, z: 0 } : position;
         this.velocity = velocity == null ? { x: 0, y: 0, z: 0 } : velocity;
@@ -16,14 +16,11 @@ class Particle
             z: this.force_experienced.z / this.mass 
         };
 
-        let triangles = 14;
-        if (this.radius > 15) 
-            triangles = 34;
-        
-        this.mesh = new Mesh (
-            new SphereGeometry (this.radius, triangles, triangles),
-            new MeshPhysicalMaterial ({ color: color, clearcoat: 0.8 })
-        );
+		let triangles = 12;
+		if (this.radius > 15) triangles = 26;
+       
+        this.mesh = new Mesh (new SphereGeometry (this.radius, triangles, triangles), material);
+		this.mesh.material.color = color;
 
         this.mesh.position.set (this.position.x, this.position.y, this.position.z);
     }
